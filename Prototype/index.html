@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1f2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>GASTRO MARKET</title>
+<style>
+/* ═══════════════════════════════════════════════════
+   ЗМІННІ ТА СКИДАННЯ
+═══════════════════════════════════════════════════ */
+:root {
+  --bg:       #f0f2f7;
+  --surface:  #ffffff;
+  --header:   #1a1f2e;
+  --accent:   #f53500;
+  --text:     #1a1f2e;
+  --muted:    #6b7280;
+  --border:   #e5e7eb;
+  --radius:   14px;
+  --shadow:   0 2px 12px rgba(0,0,0,0.08);
+  --sheet-radius: 22px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overscroll-behavior: none; }
+body {
+  font-family: -apple-system, 'Segoe UI', Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ═══════════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════════ */
+header {
+  background: var(--header);
+  color: #fff;
+  padding: 14px 16px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+}
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.logo h1 {
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  background: linear-gradient(135deg, #fff 30%, #ffaa95);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.header-count {
+  font-size: 12px;
+  color: rgba(255,255,255,0.45);
+  font-weight: 500;
+}
+
+/* Пошук */
+.search-wrap { position: relative; margin-bottom: 10px; }
+.search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  padding: 11px 38px 11px 14px;
+  border-radius: 11px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.search-input::placeholder { color: rgba(255,255,255,0.45); }
+.search-input:focus {
+  background: rgba(255,255,255,0.16);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow: 0 0 0 3px rgba(245,53,0,0.22);
+}
+.search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px;
+  background: rgba(255,255,255,0.18);
+  border-radius: 50%;
+  display: none;
+  align-items: center; justify-content: center;
+  color: #fff; font-size: 11px; font-weight: 700;
+  cursor: pointer; user-select: none;
+}
+
+/* Фільтр категорій */
+.filter-scroll {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-chip {
+  flex-shrink: 0;
+  padding: 6px 13px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1.5px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.7);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  user-select: none;
+}
+.filter-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.filter-chip:active { opacity: 0.75; }
+
+/* ═══════════════════════════════════════════════════
+   СІТКА КАРТОК
+═══════════════════════════════════════════════════ */
+.main { padding: 14px 12px; max-width: 1200px; margin: 0 auto; }
+.results-info {
+  font-size: 13px; color: var(--muted);
+  margin-bottom: 10px; font-weight: 500;
+  min-height: 18px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+@media (min-width: 480px)  { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 720px)  { .grid { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(5, 1fr); gap: 18px; } }
+
+/* ═══════════════════════════════════════════════════
+   КАРТКА
+═══════════════════════════════════════════════════ */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-user-select: none; user-select: none;
+}
+.card:active { transform: scale(0.97); box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+
+/* Зображення з skeleton */
+.card-img-wrap {
+  width: 100%;
+  padding-top: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #eef0f5;
+}
+.skeleton-pulse {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, #e8eaf0 25%, #f3f4f8 50%, #e8eaf0 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+@keyframes skeleton {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.card-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card-img.loaded { opacity: 1; }
+
+/* Бейдж знижки */
+.card-badge {
+  position: absolute; top: 8px; left: 8px;
+  background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 6px; border-radius: 6px;
+  z-index: 2;
+}
+
+/* Інфо під фото */
+.card-info {
+  padding: 10px;
+  flex: 1;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.card-brand {
+  font-size: 10px; text-transform: uppercase;
+  color: var(--muted); font-weight: 700;
+  letter-spacing: 0.5px; margin-bottom: 2px;
+}
+.card-name {
+  font-size: 13px; font-weight: 600;
+  line-height: 1.3; color: var(--text);
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 34px;
+}
+.price-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px; }
+.price-now  { font-size: 15px; font-weight: 800; color: var(--accent); }
+.price-old  { font-size: 11px; text-decoration: line-through; color: var(--muted); }
+.price-unit { font-size: 11px; color: var(--muted); }
+
+/* ═══════════════════════════════════════════════════
+   ПОРОЖНІЙ СТАН
+═══════════════════════════════════════════════════ */
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 52px 16px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 42px; margin-bottom: 12px; }
+.empty p { font-size: 15px; }
+
+/* ═══════════════════════════════════════════════════
+   BOTTOM SHEET (шторка)
+═══════════════════════════════════════════════════ */
+.sheet-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0);
+  z-index: 200;
+  visibility: hidden;
+  transition: background 0.3s;
+}
+.sheet-overlay.open {
+  visibility: visible;
+  background: rgba(0,0,0,0.5);
+}
+.sheet {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-radius: var(--sheet-radius) var(--sheet-radius) 0 0;
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  will-change: transform;
+  max-width: 560px;
+  margin: 0 auto;
+}
+.sheet-overlay.open .sheet {
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.sheet-handle {
+  width: 40px; height: 4px;
+  background: #d1d5db;
+  border-radius: 2px;
+  margin: 10px auto 0;
+}
+
+.sheet-body { padding: 12px 18px 32px; }
+.sheet-head {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 14px;
+}
+.sheet-brand { font-size: 11px; text-transform: uppercase; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; margin-bottom: 3px; }
+.sheet-name  { font-size: 17px; font-weight: 700; line-height: 1.3; color: var(--text); }
+.sheet-close {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  background: var(--bg); border: none;
+  border-radius: 50%;
+  font-size: 14px; font-weight: 700;
+  color: var(--muted); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: 10px; margin-top: 2px;
+}
+
+/* Фото в шторці */
+.sheet-img-wrap {
+  width: 100%; height: 200px;
+  border-radius: 12px; overflow: hidden;
+  background: #eef0f5;
+  margin-bottom: 14px;
+  position: relative;
+  cursor: zoom-in;
+}
+.sheet-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.zoom-hint {
+  position: absolute; bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.5);
+  color: #fff; font-size: 11px;
+  padding: 3px 8px; border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Ціна в шторці */
+.sheet-price-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px;
+}
+.sheet-price-now  { font-size: 22px; font-weight: 800; color: var(--accent); }
+.sheet-price-old  { font-size: 14px; text-decoration: line-through; color: var(--muted); }
+.sheet-price-unit { font-size: 13px; color: var(--muted); }
+
+/* Таблиця характеристик */
+.specs-title { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.spec-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--border);
+  font-size: 14px;
+}
+.spec-label { color: var(--muted); }
+.spec-value { font-weight: 600; }
+.spec-value.in-stock  { color: #16a34a; }
+.spec-value.out-stock { color: var(--accent); }
+
+/* Опис */
+.sheet-desc {
+  margin-top: 14px;
+  font-size: 14px; color: #4b5563;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════════════
+   ЛАЙТБОКС — ПОВНИЙ ЕКРАН
+═══════════════════════════════════════════════════ */
+.lightbox {
+  position: fixed; inset: 0;
+  background: #000;
+  z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden;
+  transition: opacity 0.22s ease;
+  touch-action: none;
+}
+.lightbox.open { opacity: 1; visibility: visible; }
+
+.lb-img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  transform: scale(0.96);
+  transition: transform 0.22s ease;
+  user-select: none; -webkit-user-select: none;
+  pointer-events: none;
+}
+.lightbox.open .lb-img { transform: scale(1); }
+
+.lb-close {
+  position: absolute; top: env(safe-area-inset-top, 20px); right: 20px;
+  width: 44px; height: 44px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.2);
+  border-radius: 50%;
+  color: #fff; font-size: 20px; font-weight: 300;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(6px);
+}
+.lb-close:active { background: rgba(255,255,255,0.25); }
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ══════════════════════════════════════════════ -->
+<header>
+  <div class="header-top">
+    <div class="logo"><h1>GASTRO MARKET</h1></div>
+    <div id="headerCount" class="header-count"></div>
+  </div>
+  <div class="search-wrap">
+    <input type="search" id="searchInput" class="search-input" placeholder="Пошук товару або бренду..." autocomplete="off" autocorrect="off" spellcheck="false">
+    <div id="searchClear" class="search-clear">✕</div>
+  </div>
+  <div id="filterScroll" class="filter-scroll"></div>
+</header>
+
+<!-- ══ КАТАЛОГ ══════════════════════════════════════════════ -->
+<main class="main">
+  <div id="resultsInfo" class="results-info"></div>
+  <div id="catalogGrid" class="grid"></div>
+</main>
+
+<!-- ══ ШТОРКА (Bottom Sheet) ══════════════════════════════ -->
+<div id="sheetOverlay" class="sheet-overlay" aria-modal="true" role="dialog">
+  <div id="sheet" class="sheet">
+    <div class="sheet-handle" id="sheetHandle"></div>
+    <div class="sheet-body">
+      <div class="sheet-head">
+        <div>
+          <div id="sheetBrand" class="sheet-brand"></div>
+          <div id="sheetName"  class="sheet-name"></div>
+        </div>
+        <button class="sheet-close" id="sheetClose" aria-label="Закрити">✕</button>
+      </div>
+
+      <div class="sheet-img-wrap" id="sheetImgWrap">
+        <img id="sheetImg" class="sheet-img" src="" alt="">
+        <div class="zoom-hint">🔍 збільшити</div>
+      </div>
+
+      <div class="sheet-price-row">
+        <span id="sheetPriceNow" class="sheet-price-now"></span>
+        <span id="sheetPriceOld" class="sheet-price-old"></span>
+        <span id="sheetPriceUnit" class="sheet-price-unit"></span>
+      </div>
+
+      <div class="specs-title">Характеристики</div>
+      <div id="sheetSpecs"></div>
+      <p id="sheetDesc" class="sheet-desc"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ЛАЙТБОКС ══════════════════════════════════════════ -->
+<div id="lightbox" class="lightbox" aria-modal="true" role="dialog" aria-label="Зображення товару">
+  <button class="lb-close" id="lbClose" aria-label="Закрити">✕</button>
+  <img id="lbImg" class="lb-img" src="" alt="">
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   ЗАВАНТАЖЕННЯ ДАНИХ
+═══════════════════════════════════════════════ */
+let ALL_PRODUCTS  = [];
+let activeCategory = "Всі";
+
+async function loadData() {
+  try {
+    const res = await fetch("products.json");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    ALL_PRODUCTS = await res.json();
+    document.getElementById("headerCount").textContent = ALL_PRODUCTS.length + " позицій";
+    buildFilters();
+    render();
+  } catch (e) {
+    document.getElementById("resultsInfo").textContent = "⚠ Не вдалося завантажити products.json";
+    console.error(e);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ФІЛЬТРИ КАТЕГОРІЙ
+═══════════════════════════════════════════════ */
+function buildFilters() {
+  const scroll = document.getElementById("filterScroll");
+  const cats = ["Всі", ...new Set(ALL_PRODUCTS.map(p => p.category).filter(Boolean))];
+
+  cats.forEach(cat => {
+    const chip = document.createElement("button");
+    chip.className = "filter-chip" + (cat === "Всі" ? " active" : "");
+    chip.textContent = cat;
+    chip.onclick = () => {
+      activeCategory = cat;
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      render();
+    };
+    scroll.appendChild(chip);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   РЕНДЕР КАТАЛОГУ
+═══════════════════════════════════════════════ */
+function render() {
+  const grid  = document.getElementById("catalogGrid");
+  const query = document.getElementById("searchInput").value.toLowerCase().trim();
+
+  let filtered = ALL_PRODUCTS;
+
+  if (activeCategory !== "Всі") {
+    filtered = filtered.filter(p => p.category === activeCategory);
+  }
+  if (query) {
+    filtered = filtered.filter(p =>
+      p.name.toLowerCase().includes(query)    ||
+      p.brand.toLowerCase().includes(query)   ||
+      p.category.toLowerCase().includes(query)||
+      p.article.toLowerCase().includes(query)
+    );
+  }
+
+  const info = document.getElementById("resultsInfo");
+  if (query || activeCategory !== "Всі") {
+    info.innerHTML = `Знайдено: <strong>${filtered.length}</strong> із ${ALL_PRODUCTS.length}`;
+  } else {
+    info.innerHTML = `Показано: <strong>${filtered.length}</strong> позицій`;
+  }
+
+  grid.innerHTML = "";
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">🔍</div>
+        <p>Нічого не знайдено</p>
+      </div>`;
+    return;
+  }
+
+  filtered.forEach(p => {
+    const discount = p.price_old
+      ? Math.round((1 - p.price / p.price_old) * 100)
+      : 0;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.setAttribute("data-id", p.id);
+    card.innerHTML = `
+      <div class="card-img-wrap">
+        <div class="skeleton-pulse" id="sk-${p.id}"></div>
+        ${discount > 0 ? `<div class="card-badge">-${discount}%</div>` : ""}
+        <img class="card-img"
+             src="${p.photo}"
+             alt="${p.name}"
+             loading="lazy"
+             onload="imgLoaded(this, ${p.id})"
+             onerror="imgError(this, ${p.id})">
+      </div>
+      <div class="card-info">
+        <div>
+          <div class="card-brand">${p.brand}</div>
+          <div class="card-name">${p.name}</div>
+        </div>
+        <div class="price-row">
+          <span class="price-now">${formatPrice(p.price)} ₴</span>
+          ${p.price_old ? `<span class="price-old">${formatPrice(p.price_old)} ₴</span>` : ""}
+          <span class="price-unit">/ ${p.unit}</span>
+        </div>
+      </div>`;
+
+    card.onclick = () => openSheet(p);
+    grid.appendChild(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   SKELETON — ЗАВАНТАЖЕННЯ ФОТО
+═══════════════════════════════════════════════ */
+function imgLoaded(img, id) {
+  img.classList.add("loaded");
+  const sk = document.getElementById("sk-" + id);
+  if (sk) sk.style.display = "none";
+}
+function imgError(img, id) {
+  img.style.display = "none";
+  const sk = document.getElementById("sk-" + id);
+  if (sk) {
+    sk.style.animation = "none";
+    sk.style.background = "#eef0f5";
+  }
+}
+
+function formatPrice(v) {
+  return Number.isInteger(v) ? v : v.toFixed(2).replace(/\.00$/, "");
+}
+
+/* ═══════════════════════════════════════════════
+   ШТОРКА — OPEN / CLOSE
+═══════════════════════════════════════════════ */
+function openSheet(p) {
+  document.getElementById("sheetBrand").textContent   = p.brand;
+  document.getElementById("sheetName").textContent    = p.name;
+
+  const img = document.getElementById("sheetImg");
+  img.src = p.photo;
+  img.alt = p.name;
+  img.onerror = () => img.style.visibility = "hidden";
+
+  // Ціни
+  document.getElementById("sheetPriceNow").textContent  = formatPrice(p.price) + " ₴";
+  document.getElementById("sheetPriceOld").textContent  = p.price_old ? formatPrice(p.price_old) + " ₴" : "";
+  document.getElementById("sheetPriceUnit").textContent = "/ " + p.unit;
+
+  // Клік по фото — лайтбокс
+  document.getElementById("sheetImgWrap").onclick = () => openLightbox(p.photo, p.name);
+
+  // Характеристики
+  let specs = "";
+  for (const [k, v] of Object.entries(p.specs || {})) {
+    specs += `<div class="spec-row"><span class="spec-label">${k}</span><span class="spec-value">${v}</span></div>`;
+  }
+  const stockClass = p.stock > 0 ? "in-stock" : "out-stock";
+  const stockText  = p.stock > 0 ? `✓ ${p.stock} ${p.unit}` : "❌ Немає";
+  specs += `<div class="spec-row"><span class="spec-label">Залишок</span><span class="spec-value ${stockClass}">${stockText}</span></div>`;
+  specs += `<div class="spec-row"><span class="spec-label">Артикул</span><span class="spec-value">${p.article}</span></div>`;
+  document.getElementById("sheetSpecs").innerHTML = specs;
+
+  // Опис
+  document.getElementById("sheetDesc").textContent = p.desc || "";
+
+  const overlay = document.getElementById("sheetOverlay");
+  overlay.classList.add("open");
+  document.body.style.overflow = "hidden";
+
+  // Скидаємо скрол шторки нагору при кожному відкритті
+  document.getElementById("sheet").scrollTop = 0;
+}
+
+function closeSheet() {
+  document.getElementById("sheetOverlay").classList.remove("open");
+  if (!document.getElementById("lightbox").classList.contains("open")) {
+    document.body.style.overflow = "";
+  }
+}
+
+/* Клік на оверлей (поза шторкою) */
+document.getElementById("sheetOverlay").addEventListener("click", function(e) {
+  if (e.target === this) closeSheet();
+});
+document.getElementById("sheetClose").onclick = closeSheet;
+
+/* ─── Свайп вниз для закриття шторки ─────────── */
+(function() {
+  const sheet    = document.getElementById("sheet");
+  const overlay  = document.getElementById("sheetOverlay");
+  let startY = 0, currentY = 0, isDragging = false;
+
+  function onStart(e) {
+    // Починати свайп тільки якщо шторка прокручена догори
+    if (sheet.scrollTop > 0) return;
+    startY     = e.touches ? e.touches[0].clientY : e.clientY;
+    currentY   = startY;
+    isDragging = true;
+    sheet.style.transition = "none";
+  }
+  function onMove(e) {
+    if (!isDragging) return;
+    currentY = e.touches ? e.touches[0].clientY : e.clientY;
+    const delta = Math.max(0, currentY - startY);
+    sheet.style.transform = `translateY(${delta}px)`;
+    // Напів-прозорість оверлею
+    const ratio = Math.min(delta / 300, 1);
+    overlay.style.background = `rgba(0,0,0,${0.5 - 0.5 * ratio})`;
+    if (delta > 0 && e.cancelable) e.preventDefault();
+  }
+  function onEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    const delta = currentY - startY;
+    sheet.style.transition = "";
+    sheet.style.transform  = "";
+    overlay.style.background = "";
+
+    if (delta > 80) {
+      closeSheet();
+    }
+  }
+
+  sheet.addEventListener("touchstart", onStart, { passive: true });
+  sheet.addEventListener("touchmove",  onMove,  { passive: false });
+  sheet.addEventListener("touchend",   onEnd);
+})();
+
+/* ═══════════════════════════════════════════════
+   ЛАЙТБОКС — ПОВНИЙ ЕКРАН
+═══════════════════════════════════════════════ */
+function openLightbox(src, alt) {
+  const lb  = document.getElementById("lightbox");
+  const img = document.getElementById("lbImg");
+  img.src = src;
+  img.alt = alt || "";
+  lb.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeLightbox() {
+  document.getElementById("lightbox").classList.remove("open");
+  // Відновлюємо overflow тільки якщо шторка теж закрита
+  if (!document.getElementById("sheetOverlay").classList.contains("open")) {
+    document.body.style.overflow = "";
+  }
+}
+
+document.getElementById("lightbox").addEventListener("click", function(e) {
+  if (e.target === this || e.target === document.getElementById("lbImg")) closeLightbox();
+});
+document.getElementById("lbClose").onclick = closeLightbox;
+
+/* Свайп вниз для закриття лайтбоксу */
+(function() {
+  const lb = document.getElementById("lightbox");
+  let startY = 0, isDragging = false;
+
+  lb.addEventListener("touchstart", e => {
+    startY     = e.touches[0].clientY;
+    isDragging = true;
+  }, { passive: true });
+
+  lb.addEventListener("touchend", e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const delta = e.changedTouches[0].clientY - startY;
+    if (Math.abs(delta) > 70) closeLightbox();
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   ПОШУК
+═══════════════════════════════════════════════ */
+const searchInput = document.getElementById("searchInput");
+const searchClear = document.getElementById("searchClear");
+
+searchInput.addEventListener("input", () => {
+  searchClear.style.display = searchInput.value.length > 0 ? "flex" : "none";
+  render();
+});
+searchClear.addEventListener("click", () => {
+  searchInput.value = "";
+  searchClear.style.display = "none";
+  render();
+});
+
+/* ═══════════════════════════════════════════════
+   ESC клавіша
+═══════════════════════════════════════════════ */
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    if (document.getElementById("lightbox").classList.contains("open")) closeLightbox();
+    else if (document.getElementById("sheetOverlay").classList.contains("open")) closeSheet();
+  }
+});
+
+/* ═══════════════════════════════════════════════
+   СТАРТ
+═══════════════════════════════════════════════ */
+ALL_PRODUCTS = [{"id": 1, "article": "ROS-ШОКО-01", "name": "Шоколад Roshen Класичний Чорний", "brand": "Roshen", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["чорний", "рошен", "плитка"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 152, "specs": {"Вага": "85 г", "Вміст какао": "0.56"}, "photo": "photos/01.jpg", "desc": "Справжній екстрачорний шоколад із насиченим смаком."}, {"id": 2, "article": "ROS-ТОРТ-02", "name": "Торт Київський фірмовий 850г", "brand": "Roshen", "category": "Торти", "sub": "Бісквіти та торти", "tags": ["торт", "київський", "горіхи"], "price": 402.8, "price_old": null, "unit": "шт", "stock": 29, "specs": {"Вага": "850 г", "Горіхи": "Фундук"}, "photo": "photos/02.jpg", "desc": "Легендарний київський торт із повітряно-горіховими коржами."}, {"id": 3, "article": "ROS-ЦУКЕ-03", "name": "Цукерки Шалена Бджілка фрутті", "brand": "Roshen", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["желейні", "бджілка", "асорті"], "price": 179.85, "price_old": 206.83, "unit": "кг", "stock": 86, "specs": {"Вага": "1 кг", "Смак": "Фруктовий асорті"}, "photo": "photos/03.jpg", "desc": "Жувальні цукерки на основі карагінану з рідкою начинкою."}, {"id": 4, "article": "АВК-ЦУКЕ-04", "name": "Цукерки АВК Трюфель Оригінальний", "brand": "АВК", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["трюфель", "авк", "шоколад"], "price": 324.8, "price_old": null, "unit": "кг", "stock": 53, "specs": {"Вага": "1 кг", "Тип": "Трюфельні"}, "photo": "photos/04.jpg", "desc": "Класичний круглий трюфель із ніжною оксамитовою начинкою."}, {"id": 5, "article": "КОН-ПЕЧИ-05", "name": "Печиво Конті Супер-Контік горіховий", "brand": "Конті", "category": "Печиво", "sub": "Крекери та печиво", "tags": ["контік", "печиво", "сендвіч"], "price": 18.5, "price_old": null, "unit": "шт", "stock": 410, "specs": {"Вага": "100 г", "Смак": "Лісовий горіх"}, "photo": "photos/05.jpg", "desc": "Печиво-сендвіч із шоколадною начинкою та ароматом лісового горіха."}, {"id": 6, "article": "ЖИТ-ЦУКЕ-06", "name": "Цукерки Житомирські Ласощі ПРАЛІНЕ", "brand": "Житомирські ласощі", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["праліне", "житомир", "глазур"], "price": 216.3, "price_old": 248.75, "unit": "кг", "stock": 72, "specs": {"Вага": "1 кг", "Основа": "Праліне"}, "photo": "photos/06.jpg", "desc": "Глазуровані цукерки з класичним горіхово-праліновим корпусом."}, {"id": 7, "article": "БКК-ТІСТ-07", "name": "Тістечко БКК Забава коробка", "brand": "БКК", "category": "Тістечка", "sub": "Бісквіти та торти", "tags": ["бкк", "забава", "заварні"], "price": 132.5, "price_old": null, "unit": "уп.", "stock": 49, "specs": {"Вага": "450 г", "Крем": "Заварний"}, "photo": "photos/07.jpg", "desc": "Набір ніжних міні-тістечок із повітряним заварним кремом."}, {"id": 8, "article": "СВІ-ШОКО-08", "name": "Шоколад Світоч Особливий Чорний", "brand": "Світоч", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["світоч", "чорний", "особливий"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 136, "specs": {"Вага": "90 г", "Вміст какао": "51%"}, "photo": "photos/08.jpg", "desc": "Класичний шоколад львівської фабрики з легким присмаком солі."}, {"id": 9, "article": "ЖИТ-ЗЕФІ-09", "name": "Зефір Жако Біло-Рожевий", "brand": "Житомирські ласощі", "category": "Зефір", "sub": "Коробкові цукерки", "tags": ["зефір", "жако", "солодке"], "price": 95.2, "price_old": 109.48, "unit": "уп.", "stock": 88, "specs": {"Вага": "350 г", "Смак": "Малина-ваніль"}, "photo": "photos/09.jpg", "desc": "Ніжний зефір на натуральному яблучному пектині."}, {"id": 10, "article": "ХБФ-МАРМ-10", "name": "Мармелад ХБФ Фруктовий Врожай", "brand": "ХБФ", "category": "Мармелад", "sub": "Драже", "tags": ["мармелад", "хбф", "фрукти"], "price": 110.0, "price_old": null, "unit": "кг", "stock": 75, "specs": {"Вага": "1 кг", "Основа": "Пектин"}, "photo": "photos/10.jpg", "desc": "Традиційний цукровий мармелад в асортименті смаків."}, {"id": 11, "article": "ROS-ШОКО-11", "name": "Шоколад Roshen Класичний Чорний (Серія №11)", "brand": "Roshen", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["чорний", "рошен", "плитка"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 172, "specs": {"Вага": "85 г", "Вміст какао": "56%"}, "photo": "photos/11.jpg", "desc": "Справжній екстрачорний шоколад із насиченим смаком."}, {"id": 12, "article": "ROS-ТОРТ-12", "name": "Торт Київський фірмовий 850г (Серія №12)", "brand": "Roshen", "category": "Торти", "sub": "Бісквіти та торти", "tags": ["торт", "київський", "горіхи"], "price": 402.8, "price_old": 463.22, "unit": "шт", "stock": 49, "specs": {"Вага": "850 г", "Горіхи": "Фундук"}, "photo": "photos/12.jpg", "desc": "Легендарний київський торт із повітряно-горіховими коржами."}, {"id": 13, "article": "ROS-ЦУКЕ-13", "name": "Цукерки Шалена Бджілка фрутті (Серія №13)", "brand": "Roshen", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["желейні", "бджілка", "асорті"], "price": 179.85, "price_old": null, "unit": "кг", "stock": 106, "specs": {"Вага": "1 кг", "Смак": "Фруктовий асорті"}, "photo": "photos/13.jpg", "desc": "Жувальні цукерки на основі карагінану з рідкою начинкою."}, {"id": 14, "article": "АВК-ЦУКЕ-14", "name": "Цукерки АВК Трюфель Оригінальний (Серія №14)", "brand": "АВК", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["трюфель", "авк", "шоколад"], "price": 324.8, "price_old": null, "unit": "кг", "stock": 73, "specs": {"Вага": "1 кг", "Тип": "Трюфельні"}, "photo": "photos/14.jpg", "desc": "Класичний круглий трюфель із ніжною оксамитовою начинкою."}, {"id": 15, "article": "КОН-ПЕЧИ-15", "name": "Печиво Конті Супер-Контік горіховий (Серія №15)", "brand": "Конті", "category": "Печиво", "sub": "Крекери та печиво", "tags": ["контік", "печиво", "сендвіч"], "price": 18.5, "price_old": 21.27, "unit": "шт", "stock": 430, "specs": {"Вага": "100 г", "Смак": "Лісовий горіх"}, "photo": "photos/15.jpg", "desc": "Печиво-сендвіч із шоколадною начинкою та ароматом лісового горіха."}, {"id": 16, "article": "ЖИТ-ЦУКЕ-16", "name": "Цукерки Житомирські Ласощі ПРАЛІНЕ (Серія №16)", "brand": "Житомирські ласощі", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["праліне", "житомир", "глазур"], "price": 216.3, "price_old": null, "unit": "кг", "stock": 92, "specs": {"Вага": "1 кг", "Основа": "Праліне"}, "photo": "photos/16.jpg", "desc": "Глазуровані цукерки з класичним горіхово-праліновим корпусом."}, {"id": 17, "article": "БКК-ТІСТ-17", "name": "Тістечко БКК Забава коробка (Серія №17)", "brand": "БКК", "category": "Тістечка", "sub": "Бісквіти та торти", "tags": ["бкк", "забава", "заварні"], "price": 132.5, "price_old": null, "unit": "уп.", "stock": 69, "specs": {"Вага": "450 г", "Крем": "Заварний"}, "photo": "photos/17.jpg", "desc": "Набір ніжних міні-тістечок із повітряним заварним кремом."}, {"id": 18, "article": "СВІ-ШОКО-18", "name": "Шоколад Світоч Особливий Чорний (Серія №18)", "brand": "Світоч", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["світоч", "чорний", "особливий"], "price": 46.87, "price_old": 53.9, "unit": "шт", "stock": 156, "specs": {"Вага": "90 г", "Вміст какао": "51%"}, "photo": "photos/18.jpg", "desc": "Класичний шоколад львівської фабрики з легким присмаком солі."}, {"id": 19, "article": "ЖИТ-ЗЕФІ-19", "name": "Зефір Жако Біло-Рожевий (Серія №19)", "brand": "Житомирські ласощі", "category": "Зефір", "sub": "Коробкові цукерки", "tags": ["зефір", "жако", "солодке"], "price": 95.2, "price_old": null, "unit": "уп.", "stock": 108, "specs": {"Вага": "350 г", "Смак": "Малина-ваніль"}, "photo": "photos/19.jpg", "desc": "Ніжний зефір на натуральному яблучному пектині."}, {"id": 20, "article": "ХБФ-МАРМ-20", "name": "Мармелад ХБФ Фруктовий Врожай (Серія №20)", "brand": "ХБФ", "category": "Мармелад", "sub": "Драже", "tags": ["мармелад", "хбф", "фрукти"], "price": 110.0, "price_old": null, "unit": "кг", "stock": 95, "specs": {"Вага": "1 кг", "Основа": "Пектин"}, "photo": "photos/20.jpg", "desc": "Традиційний цукровий мармелад в асортименті смаків."}, {"id": 21, "article": "ROS-ШОКО-21", "name": "Шоколад Roshen Класичний Чорний (Серія №21)", "brand": "Roshen", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["чорний", "рошен", "плитка"], "price": 46.87, "price_old": 53.9, "unit": "шт", "stock": 192, "specs": {"Вага": "85 г", "Вміст какао": "56%"}, "photo": "photos/21.jpg", "desc": "Справжній екстрачорний шоколад із насиченим смаком."}, {"id": 22, "article": "ROS-ТОРТ-22", "name": "Торт Київський фірмовий 850г (Серія №22)", "brand": "Roshen", "category": "Торти", "sub": "Бісквіти та торти", "tags": ["торт", "київський", "горіхи"], "price": 402.8, "price_old": null, "unit": "шт", "stock": 69, "specs": {"Вага": "850 г", "Горіхи": "Фундук"}, "photo": "photos/22.jpg", "desc": "Легендарний київський торт із повітряно-горіховими коржами."}, {"id": 23, "article": "ROS-ЦУКЕ-23", "name": "Цукерки Шалена Бджілка фрутті (Серія №23)", "brand": "Roshen", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["желейні", "бджілка", "асорті"], "price": 179.85, "price_old": null, "unit": "кг", "stock": 126, "specs": {"Вага": "1 кг", "Смак": "Фруктовий асорті"}, "photo": "photos/23.jpg", "desc": "Жувальні цукерки на основі карагінану з рідкою начинкою."}, {"id": 24, "article": "АВК-ЦУКЕ-24", "name": "Цукерки АВК Трюфель Оригінальний (Серія №24)", "brand": "АВК", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["трюфель", "авк", "шоколад"], "price": 324.8, "price_old": 373.52, "unit": "кг", "stock": 93, "specs": {"Вага": "1 кг", "Тип": "Трюфельні"}, "photo": "photos/24.jpg", "desc": "Класичний круглий трюфель із ніжною оксамитовою начинкою."}, {"id": 25, "article": "КОН-ПЕЧИ-25", "name": "Печиво Конті Супер-Контік горіховий (Серія №25)", "brand": "Конті", "category": "Печиво", "sub": "Крекери та печиво", "tags": ["контік", "печиво", "сендвіч"], "price": 18.5, "price_old": null, "unit": "шт", "stock": 450, "specs": {"Вага": "100 г", "Смак": "Лісовий горіх"}, "photo": "photos/25.jpg", "desc": "Печиво-сендвіч із шоколадною начинкою та ароматом лісового горіха."}, {"id": 26, "article": "ЖИТ-ЦУКЕ-26", "name": "Цукерки Житомирські Ласощі ПРАЛІНЕ (Серія №26)", "brand": "Житомирські ласощі", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["праліне", "житомир", "глазур"], "price": 216.3, "price_old": null, "unit": "кг", "stock": 112, "specs": {"Вага": "1 кг", "Основа": "Праліне"}, "photo": "photos/26.jpg", "desc": "Глазуровані цукерки з класичним горіхово-праліновим корпусом."}, {"id": 27, "article": "БКК-ТІСТ-27", "name": "Тістечко БКК Забава коробка (Серія №27)", "brand": "БКК", "category": "Тістечка", "sub": "Бісквіти та торти", "tags": ["бкк", "забава", "заварні"], "price": 132.5, "price_old": 152.38, "unit": "уп.", "stock": 89, "specs": {"Вага": "450 г", "Крем": "Заварний"}, "photo": "photos/27.jpg", "desc": "Набір ніжних міні-тістечок із повітряним заварним кремом."}, {"id": 28, "article": "СВІ-ШОКО-28", "name": "Шоколад Світоч Особливий Чорний (Серія №28)", "brand": "Світоч", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["світоч", "чорний", "особливий"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 176, "specs": {"Вага": "90 г", "Вміст какао": "51%"}, "photo": "photos/28.jpg", "desc": "Класичний шоколад львівської фабрики з легким присмаком солі."}, {"id": 29, "article": "ЖИТ-ЗЕФІ-29", "name": "Зефір Жако Біло-Рожевий (Серія №29)", "brand": "Житомирські ласощі", "category": "Зефір", "sub": "Коробкові цукерки", "tags": ["зефір", "жако", "солодке"], "price": 95.2, "price_old": null, "unit": "уп.", "stock": 128, "specs": {"Вага": "350 г", "Смак": "Малина-ваніль"}, "photo": "photos/29.jpg", "desc": "Ніжний зефір на натуральному яблучному пектині."}, {"id": 30, "article": "ХБФ-МАРМ-30", "name": "Мармелад ХБФ Фруктовий Врожай (Серія №30)", "brand": "ХБФ", "category": "Мармелад", "sub": "Драже", "tags": ["мармелад", "хбф", "фрукти"], "price": 110.0, "price_old": 126.5, "unit": "кг", "stock": 115, "specs": {"Вага": "1 кг", "Основа": "Пектин"}, "photo": "photos/30.jpg", "desc": "Традиційний цукровий мармелад в асортименті смаків."}, {"id": 31, "article": "ROS-ШОКО-31", "name": "Шоколад Roshen Класичний Чорний (Серія №31)", "brand": "Roshen", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["чорний", "рошен", "плитка"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 212, "specs": {"Вага": "85 г", "Вміст какао": "56%"}, "photo": "photos/31.jpg", "desc": "Справжній екстрачорний шоколад із насиченим смаком."}, {"id": 32, "article": "ROS-ТОРТ-32", "name": "Торт Київський фірмовий 850г (Серія №32)", "brand": "Roshen", "category": "Торти", "sub": "Бісквіти та торти", "tags": ["торт", "київський", "горіхи"], "price": 402.8, "price_old": null, "unit": "шт", "stock": 89, "specs": {"Вага": "850 г", "Горіхи": "Фундук"}, "photo": "photos/32.jpg", "desc": "Легендарний київський торт із повітряно-горіховими коржами."}, {"id": 33, "article": "ROS-ЦУКЕ-33", "name": "Цукерки Шалена Бджілка фрутті (Серія №33)", "brand": "Roshen", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["желейні", "бджілка", "асорті"], "price": 179.85, "price_old": 206.83, "unit": "кг", "stock": 146, "specs": {"Вага": "1 кг", "Смак": "Фруктовий асорті"}, "photo": "photos/33.jpg", "desc": "Жувальні цукерки на основі карагінану з рідкою начинкою."}, {"id": 34, "article": "АВК-ЦУКЕ-34", "name": "Цукерки АВК Трюфель Оригінальний (Серія №34)", "brand": "АВК", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["трюфель", "авк", "шоколад"], "price": 324.8, "price_old": null, "unit": "кг", "stock": 113, "specs": {"Вага": "1 кг", "Тип": "Трюфельні"}, "photo": "photos/34.jpg", "desc": "Класичний круглий трюфель із ніжною оксамитовою начинкою."}, {"id": 35, "article": "КОН-ПЕЧИ-35", "name": "Печиво Конті Супер-Контік горіховий (Серія №35)", "brand": "Конті", "category": "Печиво", "sub": "Крекери та печиво", "tags": ["контік", "печиво", "сендвіч"], "price": 18.5, "price_old": null, "unit": "шт", "stock": 470, "specs": {"Вага": "100 г", "Смак": "Лісовий горіх"}, "photo": "photos/35.jpg", "desc": "Печиво-сендвіч із шоколадною начинкою та ароматом лісового горіха."}, {"id": 36, "article": "ЖИТ-ЦУКЕ-36", "name": "Цукерки Житомирські Ласощі ПРАЛІНЕ (Серія №36)", "brand": "Житомирські ласощі", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["праліне", "житомир", "глазур"], "price": 216.3, "price_old": 248.75, "unit": "кг", "stock": 132, "specs": {"Вага": "1 кг", "Основа": "Праліне"}, "photo": "photos/36.jpg", "desc": "Глазуровані цукерки з класичним горіхово-праліновим корпусом."}, {"id": 37, "article": "БКК-ТІСТ-37", "name": "Тістечко БКК Забава коробка (Серія №37)", "brand": "БКК", "category": "Тістечка", "sub": "Бісквіти та торти", "tags": ["бкк", "забава", "заварні"], "price": 132.5, "price_old": null, "unit": "уп.", "stock": 109, "specs": {"Вага": "450 г", "Крем": "Заварний"}, "photo": "photos/37.jpg", "desc": "Набір ніжних міні-тістечок із повітряним заварним кремом."}, {"id": 38, "article": "СВІ-ШОКО-38", "name": "Шоколад Світоч Особливий Чорний (Серія №38)", "brand": "Світоч", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["світоч", "чорний", "особливий"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 196, "specs": {"Вага": "90 г", "Вміст какао": "51%"}, "photo": "photos/38.jpg", "desc": "Класичний шоколад львівської фабрики з легким присмаком солі."}, {"id": 39, "article": "ЖИТ-ЗЕФІ-39", "name": "Зефір Жако Біло-Рожевий (Серія №39)", "brand": "Житомирські ласощі", "category": "Зефір", "sub": "Коробкові цукерки", "tags": ["зефір", "жако", "солодке"], "price": 95.2, "price_old": 109.48, "unit": "уп.", "stock": 148, "specs": {"Вага": "350 г", "Смак": "Малина-ваніль"}, "photo": "photos/39.jpg", "desc": "Ніжний зефір на натуральному яблучному пектині."}, {"id": 40, "article": "ХБФ-МАРМ-40", "name": "Мармелад ХБФ Фруктовий Врожай (Серія №40)", "brand": "ХБФ", "category": "Мармелад", "sub": "Драже", "tags": ["мармелад", "хбф", "фрукти"], "price": 110.0, "price_old": null, "unit": "кг", "stock": 135, "specs": {"Вага": "1 кг", "Основа": "Пектин"}, "photo": "photos/40.jpg", "desc": "Традиційний цукровий мармелад в асортименті смаків."}, {"id": 41, "article": "ROS-ШОКО-41", "name": "Шоколад Roshen Класичний Чорний (Серія №41)", "brand": "Roshen", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["чорний", "рошен", "плитка"], "price": 46.87, "price_old": null, "unit": "шт", "stock": 232, "specs": {"Вага": "85 г", "Вміст какао": "56%"}, "photo": "photos/41.jpg", "desc": "Справжній екстрачорний шоколад із насиченим смаком."}, {"id": 42, "article": "ROS-ТОРТ-42", "name": "Торт Київський фірмовий 850г (Серія №42)", "brand": "Roshen", "category": "Торти", "sub": "Бісквіти та торти", "tags": ["торт", "київський", "горіхи"], "price": 402.8, "price_old": 463.22, "unit": "шт", "stock": 109, "specs": {"Вага": "850 г", "Горіхи": "Фундук"}, "photo": "photos/42.jpg", "desc": "Легендарний київський торт із повітряно-горіховими коржами."}, {"id": 43, "article": "ROS-ЦУКЕ-43", "name": "Цукерки Шалена Бджілка фрутті (Серія №43)", "brand": "Roshen", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["желейні", "бджілка", "асорті"], "price": 179.85, "price_old": null, "unit": "кг", "stock": 166, "specs": {"Вага": "1 кг", "Смак": "Фруктовий асорті"}, "photo": "photos/43.jpg", "desc": "Жувальні цукерки на основі карагінану з рідкою начинкою."}, {"id": 44, "article": "АВК-ЦУКЕ-44", "name": "Цукерки АВК Трюфель Оригінальний (Серія №44)", "brand": "АВК", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["трюфель", "авк", "шоколад"], "price": 324.8, "price_old": null, "unit": "кг", "stock": 133, "specs": {"Вага": "1 кг", "Тип": "Трюфельні"}, "photo": "photos/44.jpg", "desc": "Класичний круглий трюфель із ніжною оксамитовою начинкою."}, {"id": 45, "article": "КОН-ПЕЧИ-45", "name": "Печиво Конті Супер-Контік горіховий (Серія №45)", "brand": "Конті", "category": "Печиво", "sub": "Крекери та печиво", "tags": ["контік", "печиво", "сендвіч"], "price": 18.5, "price_old": 21.27, "unit": "шт", "stock": 490, "specs": {"Вага": "100 г", "Смак": "Лісовий горіх"}, "photo": "photos/45.jpg", "desc": "Печиво-сендвіч із шоколадною начинкою та ароматом лісового горіха."}, {"id": 46, "article": "ЖИТ-ЦУКЕ-46", "name": "Цукерки Житомирські Ласощі ПРАЛІНЕ (Серія №46)", "brand": "Житомирські ласощі", "category": "Цукерки", "sub": "Вагові цукерки", "tags": ["праліне", "житомир", "глазур"], "price": 216.3, "price_old": null, "unit": "кг", "stock": 152, "specs": {"Вага": "1 кг", "Основа": "Праліне"}, "photo": "photos/46.jpg", "desc": "Глазуровані цукерки з класичним горіхово-праліновим корпусом."}, {"id": 47, "article": "БКК-ТІСТ-47", "name": "Тістечко БКК Забава коробка (Серія №47)", "brand": "БКК", "category": "Тістечка", "sub": "Бісквіти та торти", "tags": ["бкк", "забава", "заварні"], "price": 132.5, "price_old": null, "unit": "уп.", "stock": 129, "specs": {"Вага": "450 г", "Крем": "Заварний"}, "photo": "photos/47.jpg", "desc": "Набір ніжних міні-тістечок із повітряним заварним кремом."}, {"id": 48, "article": "СВІ-ШОКО-48", "name": "Шоколад Світоч Особливий Чорний (Серія №48)", "brand": "Світоч", "category": "Шоколад", "sub": "Плитки шоколаду", "tags": ["світоч", "чорний", "особливий"], "price": 46.87, "price_old": 53.9, "unit": "шт", "stock": 216, "specs": {"Вага": "90 г", "Вміст какао": "51%"}, "photo": "photos/48.jpg", "desc": "Класичний шоколад львівської фабрики з легким присмаком солі."}, {"id": 49, "article": "ЖИТ-ЗЕФІ-49", "name": "Зефір Жако Біло-Рожевий (Серія №49)", "brand": "Житомирські ласощі", "category": "Зефір", "sub": "Коробкові цукерки", "tags": ["зефір", "жако", "солодке"], "price": 95.2, "price_old": null, "unit": "уп.", "stock": 168, "specs": {"Вага": "350 г", "Смак": "Малина-ваніль"}, "photo": "photos/49.jpg", "desc": "Ніжний зефір на натуральному яблучному пектині."}, {"id": 50, "article": "ХБФ-МАРМ-50", "name": "Мармелад ХБФ Фруктовий Врожай (Серія №50)", "brand": "ХБФ", "category": "Мармелад", "sub": "Драже", "tags": ["мармелад", "хбф", "фрукти"], "price": 110.0, "price_old": null, "unit": "кг", "stock": 155, "specs": {"Вага": "1 кг", "Основа": "Пектин"}, "photo": "photos/50.jpg", "desc": "Традиційний цукровий мармелад в асортименті смаків."}];
+document.getElementById('headerCount').textContent = ALL_PRODUCTS.length + ' позицій';
+buildFilters();
+render();
+</script>
+</body>
+</html>
